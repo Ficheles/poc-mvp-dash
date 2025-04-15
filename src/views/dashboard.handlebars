@@ -1,0 +1,59 @@
+<!-- Stats Grid -->
+<div id="stats-grid" class="grid grid-cols-3 gap-6 mb-8">
+  {{#each data/stats}}
+    <div class="bg-white p-6 rounded-xl border border-gray-200">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-gray-500">{{label}}</h3>
+        <i class="fa-solid {{icon}} text-{{color}}-600"></i>
+      </div>
+      <p class="text-3xl font-bold">{{value}}</p>
+      <p class="text-{{color}}-500 text-sm mt-2">
+        <i class="fa-solid {{sinal}}"></i>
+        <span>{{percent}}% vs último período</span>
+      </p>
+    </div>
+  {{/each}}
+</div>
+
+<!-- Charts Row -->
+<div id="charts-row" class="grid grid-cols-2 gap-6 mb-8">
+  {{#each data/circles}}
+    <div class="bg-white p-6 rounded-xl border border-gray-200">
+      <h3 class="text-lg font-semibold mb-6">{{title}}</h3>
+      <div class="flex items-center justify-center">
+        <div class="relative w-48 h-48">
+          <div
+            class="w-48 h-48 rounded-full border-8 border-{{color}}-500"
+          ></div>
+          <div
+            class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center"
+          >
+            <p class="text-3xl font-bold text-{{color}}-600">{{value}}%</p>
+            <p class="text-gray-500">{{lable}}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  {{/each}}
+</div>
+
+<!-- Trend Chart -->
+<div id="trend-chart" class="bg-white p-6 rounded-xl border border-gray-200">
+
+  <div class="flex items-center justify-between mb-6">
+    <h3 class="text-lg font-semibold">Tendência de Envios</h3>
+  </div>
+  <div
+    class="h-64 w-full bg-gradient-to-b from-blue-50 to-white rounded-lg"
+    id="chart"
+  >
+  {{> chart}}
+  </div>
+
+</div>
+
+<script>
+    // Faz os dados do gráfico estarem disponíveis para o JS
+    console.log('data', {{{ data/chartData }}})
+    window.chartData = {{{ data/chartData }}};
+</script>
