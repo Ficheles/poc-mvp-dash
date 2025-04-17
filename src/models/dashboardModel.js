@@ -13,7 +13,7 @@ async function getNaoSouEu() {
   const result = await db.query(`
     SELECT COUNT(*) AS total_nao_sou_eu
     FROM public."JoCross_Status"
-    WHERE LOWER(interagio) LIKE '%não sou eu%';
+    WHERE LOWER(interacao_usuario) LIKE '%não sou eu%';
   `);
   return result.rows[0].total_nao_sou_eu;
 }
@@ -22,7 +22,7 @@ async function getCancelamentoPromocoes() {
   const result = await db.query(`
     SELECT COUNT(*) AS total_cancelamento
     FROM public."JoCross_Status"
-    WHERE LOWER(interagio) LIKE '%cancel%' OR LOWER(interagio) LIKE '%parar%';
+    WHERE LOWER(interacao_usuario) LIKE '%cancel%' OR LOWER(interacao_usuario) LIKE '%parar%';
   `);
   return result.rows[0].total_cancelamento;
 }
@@ -58,7 +58,7 @@ async function getTendenciaEnvios() {
     SELECT 
       DATE(created_at) AS dia,
       COUNT(*) AS total_envios,
-      SUM(case when interagio IS NOT NULL then 1 else 0 end ) as falhas
+      SUM(case when interacao_usuario IS NOT NULL then 1 else 0 end ) as falhas
     FROM public."JoCross_Status"
     WHERE status IS NOT NULL
     GROUP BY 1
