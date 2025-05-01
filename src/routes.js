@@ -5,7 +5,7 @@ const dashboardController = require("./controllers/dashboardController");
 router.get("/", dashboardController.showDashboard);
 
 router.get("/example", (req, res) => {
-  res.render("example", {
+  res.render({
     title: "Exemplo",
   });
 });
