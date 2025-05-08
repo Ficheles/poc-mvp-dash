@@ -1,34 +1,47 @@
 const db = require("../config/db");
 
 async function getTotalEnviados() {
-  const result = await db.query(`
+  try {
+    const result = await db.query(`
     SELECT COUNT(*) AS total_enviados
     FROM public."JoCross_Status"
     WHERE status IS NOT NULL;
   `);
-  return result.rows[0].total_enviados;
+    return result.rows[0].total_enviados;
+  } catch (e) {
+    return 0;
+  }
 }
 
 async function getNaoSouEu() {
-  const result = await db.query(`
+  try {
+    const result = await db.query(`
     SELECT COUNT(*) AS total_nao_sou_eu
     FROM public."JoCross_Status"
     WHERE LOWER(interacao_usuario) LIKE '%não sou eu%';
   `);
-  return result.rows[0].total_nao_sou_eu;
+    return result.rows[0].total_nao_sou_eu;
+  } catch (e) {
+    return 0;
+  }
 }
 
 async function getCancelamentoPromocoes() {
-  const result = await db.query(`
+  try {
+    const result = await db.query(`
     SELECT COUNT(*) AS total_cancelamento
     FROM public."JoCross_Status"
     WHERE LOWER(interacao_usuario) LIKE '%cancel%' OR LOWER(interacao_usuario) LIKE '%parar%';
   `);
-  return result.rows[0].total_cancelamento;
+    return result.rows[0].total_cancelamento;
+  } catch (e) {
+    return 0;
+  }
 }
 
 async function getCoberturaDisparos() {
-  const result = await db.query(`
+  try {
+    const result = await db.query(`
     SELECT 
       ROUND(
         COUNT(*) FILTER (WHERE status ILIKE '%accepted%') * 100.0 / 
@@ -37,24 +50,32 @@ async function getCoberturaDisparos() {
       ) AS cobertura_disparos_percent
     FROM public."JoCross_Status";
   `);
-  return result.rows[0].cobertura_disparos_percent;
+    return result.rows[0].cobertura_disparos_percent;
+  } catch (e) {
+    return 0;
+  }
 }
 
 async function getTaxaFalhas() {
-  const result = await db.query(`
-    SELECT 
+  try {
+    const result = await db.query(`
+      SELECT 
       ROUND(
         COUNT(*) FILTER (WHERE status ILIKE '%falha%' OR status ILIKE '%erro%') * 100.0 / 
         NULLIF(COUNT(*) FILTER (WHERE status IS NOT NULL), 0),
         1
-      ) AS taxa_falhas_percent
-    FROM public."JoCross_Status";
-  `);
-  return result.rows[0].taxa_falhas_percent;
+        ) AS taxa_falhas_percent
+        FROM public."JoCross_Status";
+        `);
+    return result.rows[0].taxa_falhas_percent;
+  } catch (e) {
+    return 0;
+  }
 }
 
 async function getTendenciaEnvios() {
-  const result = await db.query(`
+  try {
+    const result = await db.query(`
     SELECT 
       DATE(created_at) AS dia,
       COUNT(*) AS total_envios,
@@ -65,8 +86,10 @@ async function getTendenciaEnvios() {
     ORDER BY 1;
   `);
 
-  return result.rows;
-
+    return result.rows;
+  } catch (e) {
+    return [{ dia: 0, total_envios: 0, falhas: 0 }];
+  }
 }
 
 module.exports = {
