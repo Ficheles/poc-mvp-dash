@@ -16,9 +16,17 @@ async function getTotalEnviados() {
 async function getNaoSouEu() {
   try {
     const result = await db.query(`
-    SELECT COUNT(*) AS total_nao_sou_eu
-    FROM public."JoCross_Status"
-    WHERE LOWER(interacao_usuario) LIKE '%não sou eu%';
+    SELECT COUNT(distinct ( CASE
+                                WHEN LENGTH(REGEXP_REPLACE(numero, '[^0-9]', '', 'g')) = 13 THEN
+                                  CONCAT(
+                                    SUBSTRING(REGEXP_REPLACE(numero, '[^0-9]', '', 'g') FROM 1 FOR 4),
+                                    SUBSTRING(REGEXP_REPLACE(numero, '[^0-9]', '', 'g') FROM 6)
+                                  )
+                                ELSE
+                                  REGEXP_REPLACE(numero, '[^0-9]', '', 'g')
+                              END )) AS total_nao_sou_eu
+    FROM public.jocros_retorno
+    WHERE LOWER(retorno) LIKE '%bloquear%';
   `);
     return result.rows[0].total_nao_sou_eu;
   } catch (e) {
@@ -29,9 +37,17 @@ async function getNaoSouEu() {
 async function getCancelamentoPromocoes() {
   try {
     const result = await db.query(`
-    SELECT COUNT(*) AS total_cancelamento
-    FROM public."JoCross_Status"
-    WHERE LOWER(interacao_usuario) LIKE '%cancel%' OR LOWER(interacao_usuario) LIKE '%parar%';
+      SELECT COUNT(distinct ( CASE
+                                WHEN LENGTH(REGEXP_REPLACE(numero, '[^0-9]', '', 'g')) = 13 THEN
+                                  CONCAT(
+                                    SUBSTRING(REGEXP_REPLACE(numero, '[^0-9]', '', 'g') FROM 1 FOR 4),
+                                    SUBSTRING(REGEXP_REPLACE(numero, '[^0-9]', '', 'g') FROM 6)
+                                  )
+                                ELSE
+                                  REGEXP_REPLACE(numero, '[^0-9]', '', 'g')
+                              END )) AS total_cancelamento
+    FROM public.jocros_retorno
+    WHERE LOWER(retorno) LIKE '%reduzir%' OR LOWER(retorno) LIKE '%cuidad%';  
   `);
     return result.rows[0].total_cancelamento;
   } catch (e) {
@@ -44,9 +60,9 @@ async function getCoberturaDisparos() {
     const result = await db.query(`
     SELECT 
       ROUND(
-        COUNT(*) FILTER (WHERE status ILIKE '%accepted%') * 100.0 / 
-        NULLIF(COUNT(*) FILTER (WHERE status IS NOT NULL), 0),
-        1
+        NULLIF(COUNT(*) FILTER (WHERE  "Corretor_Envio" IS not NULL), 0) * 100.0 / 
+        COUNT(*) FILTER (WHERE status ILIKE '%accepted%'),
+        2
       ) AS cobertura_disparos_percent
     FROM public."JoCross_Status";
   `);
@@ -59,13 +75,13 @@ async function getCoberturaDisparos() {
 async function getTaxaFalhas() {
   try {
     const result = await db.query(`
-      SELECT 
+       SELECT 
       ROUND(
-        COUNT(*) FILTER (WHERE status ILIKE '%falha%' OR status ILIKE '%erro%') * 100.0 / 
-        NULLIF(COUNT(*) FILTER (WHERE status IS NOT NULL), 0),
-        1
-        ) AS taxa_falhas_percent
-        FROM public."JoCross_Status";
+        NULLIF(COUNT(*) FILTER (WHERE  "Corretor_Envio" IS NULL), 0) * 100.0 / 
+        COUNT(*) FILTER (WHERE status ILIKE '%accepted%'),
+        2
+      ) AS taxa_falhas_percent
+    FROM public."JoCross_Status";
         `);
     return result.rows[0].taxa_falhas_percent;
   } catch (e) {
@@ -79,7 +95,7 @@ async function getTendenciaEnvios() {
     SELECT 
       DATE(created_at) AS dia,
       COUNT(*) AS total_envios,
-      SUM(case when interacao_usuario IS NOT NULL then 1 else 0 end ) as falhas
+      SUM(case when status_envio IS NULL then 1 else 0 end ) as falhas
     FROM public."JoCross_Status"
     WHERE status IS NOT NULL
     GROUP BY 1

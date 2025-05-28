@@ -3,7 +3,7 @@ const dm = require("../models/dashboardModel");
 async function getDashboardData() {
   const [
     totalEnviados,
-    naoSouEu,
+    bloquear,
     cancelamentoPromocoes,
     coberturaDisparos,
     taxaFalhas,
@@ -28,20 +28,20 @@ async function getDashboardData() {
         percent: "12.5",
       },
       {
-        label: "Não sou eu",
-        value: naoSouEu,
-        color: "red",
-        icon: "fa-user-xmark",
-        sinal: "fa-arrow-up",
-        percent: "3.2",
-      },
-      {
-        label: "Cancelamento de Promoções",
+        label: "Reduzir Mensalidade",
         value: cancelamentoPromocoes,
         color: "orange",
-        icon: "fa-ban ",
+        icon: "fa-user-xmark",
         sinal: "fa-arrow-down",
         percent: "5.1",
+      },
+      {
+        label: "Bloquear",
+        value: bloquear,
+        color: "red",
+        icon: "fa-ban ",
+        sinal: "fa-arrow-up",
+        percent: "3.2",
       },
     ],
     circles: [
@@ -62,14 +62,14 @@ async function getDashboardData() {
       series: [
         {
           name: "Envios",
-          data: tendenciaEnvios.map(i => i.total_envios),
+          data: tendenciaEnvios.map((i) => i.total_envios),
         },
         {
           name: "Falhas",
-          data: tendenciaEnvios.map(i => i.falhas),
+          data: tendenciaEnvios.map((i) => i.falhas),
         },
       ],
-      categories: tendenciaEnvios.map(i => i.dia),
+      categories: tendenciaEnvios.map((i) => i.dia),
     }),
   };
 }
